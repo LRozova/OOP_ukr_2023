@@ -1,0 +1,129 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <windows.h>
+
+using namespace std;
+
+const int maxlen = 255;
+#pragma pack(push, 1) //директиви компілятору для вирівнювання полів структур
+struct sworker {
+    char fio[maxlen];
+    int age;
+};
+#pragma pack(pop) //директиви компілятору для вирівнювання полів структур
+
+sworker arr[maxlen];
+int worker_index = 0;
+
+int menu();//прототипи функцій
+void readFromFile(const char* fileName);
+void saveToFile(const char* fileName);
+void addNew();
+void del();
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");//забезпечення використання кирилиці
+    SetConsoleOutputCP(1251);
+    SetConsoleCP(1251);
+    while (1) {  //створення нескінченного циклу з меню вибору, виклик відповідних функцій 
+        switch (menu()) {
+        case 1:
+            readFromFile("file.dat");
+            break;
+        case 2:
+            saveToFile("file.dat");
+            break;
+        case 3:
+            addNew();
+            break;
+        case 4:
+            del();
+            break;
+        case 5:
+            return 0;
+        default:
+            cout << "Невірний вибір" << endl;
+        }
+    }
+}
+int menu()//функція показує пункти меню вибору
+{
+    cout << "\n";
+    int ans;
+    cout << "Оберіть\n";
+    cout << "1-для зчитування з файла\n";
+    cout << "2-для запису в файл\n";
+    cout << "3-для додавання запису\n";
+    cout << "4-для видалення запису\n";
+    cout << "5-для виходу\n";
+    cout << "\n";
+    cout << "Ваш вибір  ";
+    cin >> ans;
+    return ans;
+}
+void saveToFile(const char* fileName) //функція, що записує дані у бінарний файл
+{
+    ofstream f;
+    f.open(fileName, ios::binary);
+    f.write((char*)arr, sizeof(sworker) * worker_index);
+    f.close();
+    cout << "Введені дані збережено до файлу\n";
+}
+void readFromFile(const char* fileName) //функція, що зчитує дані з бінарного файлу
+{
+    ifstream f;
+    f.open(fileName, ios::binary);
+    if (!f) {
+        cout << "Файлу не існує";
+    }
+    else {
+        sworker worker;
+        worker_index = 0;
+        while (1) {
+            f.read((char*)&worker, sizeof(worker));
+            if (f.eof())
+                break;
+            arr[worker_index] = worker;
+            worker_index++;
+        }
+        f.close();
+        cout << "Дані зчитано з файлу\n";
+        for (int i = 0; i < worker_index; i++) {
+            cout << i + 1 << "\t" << arr[i].fio << "\t" << arr[i].age << endl;
+        }
+    }
+}
+void addNew()//функція, що додає(створює) новий запис
+{
+    cout << "Додавання нового запису\n\n";
+    cout << "Запис номер " << worker_index + 1 << "\n";
+    cin.ignore();
+    cout << "Введіть ПІБ  ";
+    cin.getline(arr[worker_index].fio, maxlen);
+    cout << "Введіть вік  ";
+    cin >> arr[worker_index].age;
+    worker_index++;
+    cout << "\n";
+    for (int i = 0; i < worker_index; i++) {
+        cout << i + 1 << "\t" << arr[i].fio << "\t" << arr[i].age << endl;
+    }
+    cout << "\n";
+}
+
+void del()//функція, що видаляє запис 
+{
+    int d;
+    cout << "Оберіть номер запису, який необхідно видалити ";
+    cin >> d;
+    for (int i = d - 1; i < worker_index; i++) 
+       { arr[i] = arr[i + 1];}
+    worker_index--;
+    	
+    cout << "\n";
+    for (int i = 0; i < worker_index; i++) {
+        cout << i + 1 << "\t" << arr[i].fio << "\t" << arr[i].age << endl;
+    }
+    cout << "\n";
+}
